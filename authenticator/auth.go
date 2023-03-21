@@ -5,8 +5,7 @@ import (
 
 	"github.com/Appkube-awsx/awsx-waf/vault"
 )
-
-func AuthenticateData(vaultUrl string, accountNo string, region string, acKey string, secKey string, crossAccountRoleArn string,externalId string) bool {
+func AuthenticateData(vaultUrl string, accountNo string, region string, acKey string, secKey string, crossAccountRoleArn string, env string, externalId string) bool {
 
 	if vaultUrl != "" && accountNo != "" {
 		if region == "" {
@@ -19,16 +18,16 @@ func AuthenticateData(vaultUrl string, accountNo string, region string, acKey st
 			log.Println("Error in calling the account details api. \n", err)
 			return false
 		}
-		if data.AccessKey == "" || data.SecretKey == "" || data.CrossAccountRoleArn == "" {
+		if data.AccessKey == "" || data.SecretKey == "" || data.CrossAccountRoleArn == ""  || env == ""{
 			log.Println("Account details not found.")
 			return false
 		}
 		return true
 
-	} else if region != "" && acKey != "" && secKey != "" && crossAccountRoleArn != "" && externalId != "" {
+	} else if region != "" && acKey != "" && secKey != "" && crossAccountRoleArn != "" && env != "" && externalId != "" {
 		return true
 	} else {
-		log.Fatal("AWS credentials like accesskey/secretkey/region/crossAccountRoleArn/ExternalId not provided. Program exit")
+		log.Fatal("AWS credentials like accesskey/secretkey/region/crossAccountRoleArn/env/externalId not provided. Program exit")
 		return false
 	}
 }

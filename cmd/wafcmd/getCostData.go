@@ -1,7 +1,6 @@
-package cmd
+package wafcmd
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/Appkube-awsx/awsx-waf/authenticator"
@@ -15,7 +14,7 @@ import (
 var GetCostDataCmd = &cobra.Command{
 	Use:   "getCostData",
 	Short: "A brief description of your command",
-	Long:  "get cost data in details",
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		vaultUrl := cmd.Parent().PersistentFlags().Lookup("vaultUrl").Value.String()
@@ -24,36 +23,35 @@ var GetCostDataCmd = &cobra.Command{
 		acKey := cmd.Parent().PersistentFlags().Lookup("accessKey").Value.String()
 		secKey := cmd.Parent().PersistentFlags().Lookup("secretKey").Value.String()
 		crossAccountRoleArn := cmd.Parent().PersistentFlags().Lookup("crossAccountRoleArn").Value.String()
-		externalId := cmd.PersistentFlags().Lookup("externalId").Value.String()
+		env := cmd.Parent().PersistentFlags().Lookup("env").Value.String()
+		externalId := cmd.Parent().PersistentFlags().Lookup("externalId").Value.String()
 		
-
-		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey, crossAccountRoleArn,externalId)
+		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey, crossAccountRoleArn, env, externalId)
 		
 
 		if authFlag {
-			getCostDetails(region, crossAccountRoleArn, acKey, secKey, externalId)
-		
-		 }
+			getWafCostDetail(region, crossAccountRoleArn, acKey, secKey, externalId)
+		}
 	},
 }
 
-func getCostDetails(region string, crossAccountRoleArn string, accessKey string, secretKey string, externalId string) (*costexplorer.GetCostAndUsageOutput, error) {
-	log.Println("Getting cost data")
-	costClient := client.GetCostClient(region, crossAccountRoleArn, accessKey, secretKey,externalId)
+func getWafCostDetail(region string, crossAccountRoleArn string, accessKey string, secretKey string, externalId string) (*costexplorer.GetCostAndUsageOutput, error) {
+	log.Println("Getting web acl cost data")
+	costClient := client.GetCostClient(region, crossAccountRoleArn, accessKey, secretKey, externalId)
 
 	input := &costexplorer.GetCostAndUsageInput{
 		TimePeriod: &costexplorer.DateInterval{
-			Start: aws.String("2023-01-01"),
-			End:   aws.String("2023-02-01"),
+			Start: aws.String("2022-05-01"),
+			End:   aws.String("2022-05-31"),
 		},
 		Metrics: []*string{
-			aws.String("USAGE_QUANTITY"),
+			// aws.String("USAGE_QUANTITY"),
 			aws.String("UNBLENDED_COST"),
 			aws.String("BLENDED_COST"),
-			aws.String("AMORTIZED_COST"),
-			aws.String("NET_AMORTIZED_COST"),
-			aws.String("NET_UNBLENDED_COST"),
-			aws.String("NORMALIZED_USAGE_AMOUNT"),
+			// aws.String("AMORTIZED_COST"),
+			// aws.String("NET_AMORTIZED_COST"),
+			// aws.String("NET_UNBLENDED_COST"),
+			// aws.String("NORMALIZED_USAGE_AMOUNT"),
 
 		},
 		GroupBy: []*costexplorer.GroupDefinition{
@@ -71,7 +69,7 @@ func getCostDetails(region string, crossAccountRoleArn string, accessKey string,
 			Dimensions: &costexplorer.DimensionValues{
 				Key: aws.String("SERVICE"),
 				Values: []*string{
-					aws.String("Amazon WAF"),
+					aws.String("AWS WAF"),
 				},
 			},
 		},
@@ -81,16 +79,10 @@ func getCostDetails(region string, crossAccountRoleArn string, accessKey string,
 	if err != nil {
 		log.Fatalln("Error: in getting cost data", err)
 	}
-
 	log.Println(costData)
 	return costData, err
 }
 
 func init() {
-	GetCostDataCmd.Flags().StringP("WebACLId", "t", "", "webACL id..!!")
-	if err := GetCostDataCmd.MarkFlagRequired("WebACLId"); err != nil {
-		fmt.Println(err)
-	}
-
+	
 }
-

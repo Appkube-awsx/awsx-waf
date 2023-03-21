@@ -6,53 +6,55 @@ import (
 
 	"github.com/Appkube-awsx/awsx-waf/authenticator"
 	"github.com/Appkube-awsx/awsx-waf/client"
-	cmd "github.com/Appkube-awsx/awsx-waf/cmd/wafcmd"
+	"github.com/Appkube-awsx/awsx-waf/cmd/wafcmd"
 	"github.com/aws/aws-sdk-go/service/waf"
 	"github.com/spf13/cobra"
 )
 
-var getWafWebACLmetdataCmd = &cobra.Command{
-	Use:   "getwafMetadata",
-	Short: "getwafMetadata command gets resource counts",
-	Long:  `getwafMetadata command gets resource counts details of an AWS account`,
+
+var AwsxWafListCmd = &cobra.Command{
+	Use:   "getWafListDetails",
+	Short: "getWafListDetails command gets resource counts",
+	Long:  `getWafListDetails command gets resource counts details of an AWS account`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("Command waf details started")
+		
+		log.Println("Command get waf list started")
 		vaultUrl := cmd.PersistentFlags().Lookup("vaultUrl").Value.String()
 		accountNo := cmd.PersistentFlags().Lookup("accountId").Value.String()
 		region := cmd.PersistentFlags().Lookup("zone").Value.String()
 		acKey := cmd.PersistentFlags().Lookup("accessKey").Value.String()
 		secKey := cmd.PersistentFlags().Lookup("secretKey").Value.String()
 		crossAccountRoleArn := cmd.PersistentFlags().Lookup("crossAccountRoleArn").Value.String()
+		env := cmd.PersistentFlags().Lookup("env").Value.String()
 		externalId := cmd.PersistentFlags().Lookup("externalId").Value.String()
-		
 
-		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey,crossAccountRoleArn, externalId)
+		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey,crossAccountRoleArn, env, externalId)
 		
 
 		if authFlag {
-			getListWebACLData(region, crossAccountRoleArn, acKey, secKey, externalId)
-		}
+			getWebAclList(region, crossAccountRoleArn, acKey, secKey, env, externalId)
+	    }	
 		
 	},
 }
 
-func  getListWebACLData(region string, crossAccountRoleArn string, accessKey string, secretKey string, externalId string) *waf.ListWebACLsOutput  {
-	log.Println("Getting aws waf metaData Count summary")
-	webAclClient := client.GetClient(region, crossAccountRoleArn,  accessKey, secretKey, externalId)
-	input := &waf.ListWebACLsInput{
-		
-	}
-	webAclResponse, err := webAclClient.ListWebACLs(input)
+
+
+func getWebAclList(region string, crossAccountRoleArn string, accessKey string, secretKey string, env string,externalId  string) (*waf.ListWebACLsOutput ,error){
+	log.Println(" aws waf list details count summary")
+	dbclient := client.GetClient(region, crossAccountRoleArn, accessKey, secretKey,  externalId)
+	dbRequest := waf.ListWebACLsInput{}
+	dbclusterResponse, err := dbclient.ListWebACLs(&dbRequest)
 	if err != nil {
 		log.Fatalln("Error:", err)
 	}
-	log.Println(webAclResponse)
-	return webAclResponse
+	log.Println(dbclusterResponse)
+	return dbclusterResponse,err
 }
 
 func Execute() {
-	err := getWafWebACLmetdataCmd.Execute()
+	err := AwsxWafListCmd.Execute()
 	if err != nil {
 		log.Fatal("There was some error while executing the CLI: ", err)
 		os.Exit(1)
@@ -60,19 +62,18 @@ func Execute() {
 }
 
 func init() {
-	
-	getWafWebACLmetdataCmd.AddCommand(cmd.GetConfigDataCmd)
-	getWafWebACLmetdataCmd.AddCommand(cmd.GetCostDataCmd)
+	AwsxWafListCmd.AddCommand(wafcmd.GetConfigDataCmd)
+	AwsxWafListCmd.AddCommand(wafcmd.GetCostDataCmd)
 
-	getWafWebACLmetdataCmd.PersistentFlags().String("vaultUrl", "", "vault end point")
-	getWafWebACLmetdataCmd.PersistentFlags().String("accountId", "", "aws account number")
-	getWafWebACLmetdataCmd.PersistentFlags().String("zone", "", "aws region")
-	getWafWebACLmetdataCmd.PersistentFlags().String("accessKey", "", "aws access key")
-	getWafWebACLmetdataCmd.PersistentFlags().String("secretKey", "", "aws secret key")
-	getWafWebACLmetdataCmd.PersistentFlags().String("crossAccountRoleArn", "", "aws cross account role arn")
-	getWafWebACLmetdataCmd.PersistentFlags().String("externalId", "", "aws externalId is required key")
-	getWafWebACLmetdataCmd.PersistentFlags().String("WebACLId", "", "aws WebACLId is required key")
-	
+	AwsxWafListCmd.PersistentFlags().String("vaultUrl", "", "vault end point")
+	AwsxWafListCmd.PersistentFlags().String("accountId", "", "aws account number")
+	AwsxWafListCmd.PersistentFlags().String("zone", "", "aws region")
+	AwsxWafListCmd.PersistentFlags().String("accessKey", "", "aws access key")
+	AwsxWafListCmd.PersistentFlags().String("secretKey", "", "aws secret key")
+	AwsxWafListCmd.PersistentFlags().String("env", "", "aws key Required")
+	AwsxWafListCmd.PersistentFlags().String("crossAccountRoleArn", "", "aws crossAccountRoleArn Required")
+	AwsxWafListCmd.PersistentFlags().String("externalId", "", "aws externalId Required")
 	
 
 }
+

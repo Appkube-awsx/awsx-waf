@@ -6,8 +6,6 @@ import (
 
 	"github.com/Appkube-awsx/awsx-waf/authenticator"
 	"github.com/Appkube-awsx/awsx-waf/client"
-
-	// "github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/waf"
 	"github.com/spf13/cobra"
@@ -19,7 +17,7 @@ var GetConfigDataCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-	
+
 		vaultUrl := cmd.Parent().PersistentFlags().Lookup("vaultUrl").Value.String()
 		accountNo := cmd.Parent().PersistentFlags().Lookup("accountId").Value.String()
 		region := cmd.Parent().PersistentFlags().Lookup("zone").Value.String()
@@ -27,31 +25,31 @@ var GetConfigDataCmd = &cobra.Command{
 		secKey := cmd.Parent().PersistentFlags().Lookup("secretKey").Value.String()
 		crossAccountRoleArn := cmd.Parent().PersistentFlags().Lookup("crossAccountRoleArn").Value.String()
 		env := cmd.Parent().PersistentFlags().Lookup("env").Value.String()
-		externalId := cmd.Parent().PersistentFlags().Lookup("externalId").Value.String() 
-		
+		externalId := cmd.Parent().PersistentFlags().Lookup("externalId").Value.String()
+
 		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey, crossAccountRoleArn, env, externalId)
 		print(authFlag)
 		// authFlag := true
 		if authFlag {
 			webAclId, _ := cmd.Flags().GetString("webAclId")
-			if(webAclId != "") {
-				getClusterDetails(region, crossAccountRoleArn, acKey, secKey, env, externalId,webAclId)
+			if webAclId != "" {
+				getClusterDetails(region, crossAccountRoleArn, acKey, secKey, env, externalId, webAclId)
 			} else {
 				log.Fatalln("waf Acl Id not provided. Program exit")
 			}
 		}
-	}, 
-} 
+	},
+}
 
-func getClusterDetails(region string, crossAccountRoleArn string,accessKey string, secretKey string, env string, externalId string,webAclId string) *waf.GetWebACLOutput{
+func getClusterDetails(region string, crossAccountRoleArn string, accessKey string, secretKey string, env string, externalId string, webAclId string) *waf.GetWebACLOutput {
 	log.Println("Getting aws waf details data")
-	 listClusterClient := client.GetClient(region, crossAccountRoleArn, accessKey, secretKey, externalId)
+	listClusterClient := client.GetClient(region, crossAccountRoleArn, accessKey, secretKey, externalId)
 	input := &waf.GetWebACLInput{
-			WebACLId: aws.String(webAclId),
-			}
+		WebACLId: aws.String(webAclId),
+	}
 	clusterDetailsResponse, err := listClusterClient.GetWebACL(input)
 	log.Println(clusterDetailsResponse.String())
-	if err != nil { 
+	if err != nil {
 		log.Fatalln("Error:", err)
 	}
 	return clusterDetailsResponse

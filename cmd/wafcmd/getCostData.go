@@ -25,9 +25,8 @@ var GetCostDataCmd = &cobra.Command{
 		crossAccountRoleArn := cmd.Parent().PersistentFlags().Lookup("crossAccountRoleArn").Value.String()
 		env := cmd.Parent().PersistentFlags().Lookup("env").Value.String()
 		externalId := cmd.Parent().PersistentFlags().Lookup("externalId").Value.String()
-		
+
 		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey, crossAccountRoleArn, env, externalId)
-		
 
 		if authFlag {
 			getWafCostDetail(region, crossAccountRoleArn, acKey, secKey, externalId)
@@ -41,14 +40,14 @@ func getWafCostDetail(region string, crossAccountRoleArn string, accessKey strin
 
 	input := &costexplorer.GetCostAndUsageInput{
 		TimePeriod: &costexplorer.DateInterval{
-			Start: aws.String("2022-05-01"),
-			End:   aws.String("2022-05-31"),
+			Start: aws.String("2023-01-01"),
+			End:   aws.String("2023-02-01"),
 		},
 		Metrics: []*string{
 			// aws.String("USAGE_QUANTITY"),
 			aws.String("UNBLENDED_COST"),
 			aws.String("BLENDED_COST"),
-			// aws.String("AMORTIZED_COST"),
+			aws.String("AMORTIZED_COST"),
 			// aws.String("NET_AMORTIZED_COST"),
 			// aws.String("NET_UNBLENDED_COST"),
 			// aws.String("NORMALIZED_USAGE_AMOUNT"),
@@ -57,19 +56,31 @@ func getWafCostDetail(region string, crossAccountRoleArn string, accessKey strin
 		GroupBy: []*costexplorer.GroupDefinition{
 			{
 				Type: aws.String("DIMENSION"),
-				Key: aws.String("REGION"),
+				Key:  aws.String("REGION"),
 			},
 			{
 				Type: aws.String("DIMENSION"),
-                Key: aws.String("SERVICE"),
+				Key:  aws.String("SERVICE"),
 			},
 		},
-		Granularity: aws.String("MONTHLY"),
+		Granularity: aws.String("DAILY"),
 		Filter: &costexplorer.Expression{
-			Dimensions: &costexplorer.DimensionValues{
-				Key: aws.String("SERVICE"),
-				Values: []*string{
-					aws.String("AWS WAF"),
+			And: []*costexplorer.Expression{
+				{
+					Dimensions: &costexplorer.DimensionValues{
+						Key: aws.String("SERVICE"),
+						Values: []*string{
+							aws.String("AWS WAF"),
+						},
+					},
+				},
+				{
+					Dimensions: &costexplorer.DimensionValues{
+						Key: aws.String("RECORD_TYPE"),
+						Values: []*string{
+							aws.String("Credit"),
+						},
+					},
 				},
 			},
 		},
@@ -84,5 +95,5 @@ func getWafCostDetail(region string, crossAccountRoleArn string, accessKey strin
 }
 
 func init() {
-	
+
 }

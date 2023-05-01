@@ -25,19 +25,18 @@ var AwsxWafListCmd = &cobra.Command{
 		acKey := cmd.PersistentFlags().Lookup("accessKey").Value.String()
 		secKey := cmd.PersistentFlags().Lookup("secretKey").Value.String()
 		crossAccountRoleArn := cmd.PersistentFlags().Lookup("crossAccountRoleArn").Value.String()
-		env := cmd.PersistentFlags().Lookup("env").Value.String()
 		externalId := cmd.PersistentFlags().Lookup("externalId").Value.String()
 
-		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey, crossAccountRoleArn, env, externalId)
+		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey, crossAccountRoleArn, externalId)
 
 		if authFlag {
-			getWebAclList(region, crossAccountRoleArn, acKey, secKey, env, externalId)
+			getWebAclList(region, crossAccountRoleArn, acKey, secKey, externalId)
 		}
 
 	},
 }
 
-func getWebAclList(region string, crossAccountRoleArn string, accessKey string, secretKey string, env string, externalId string) (*waf.ListWebACLsOutput, error) {
+func getWebAclList(region string, crossAccountRoleArn string, accessKey string, secretKey string, externalId string) (*waf.ListWebACLsOutput, error) {
 	log.Println(" aws waf list details count summary")
 	dbclient := client.GetClient(region, crossAccountRoleArn, accessKey, secretKey, externalId)
 	dbRequest := waf.ListWebACLsInput{}
@@ -67,7 +66,6 @@ func init() {
 	AwsxWafListCmd.PersistentFlags().String("zone", "", "aws region")
 	AwsxWafListCmd.PersistentFlags().String("accessKey", "", "aws access key")
 	AwsxWafListCmd.PersistentFlags().String("secretKey", "", "aws secret key")
-	AwsxWafListCmd.PersistentFlags().String("env", "", "aws key Required")
 	AwsxWafListCmd.PersistentFlags().String("crossAccountRoleArn", "", "aws crossAccountRoleArn Required")
 	AwsxWafListCmd.PersistentFlags().String("externalId", "", "aws externalId Required")
 

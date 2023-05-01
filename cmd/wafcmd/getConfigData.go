@@ -24,16 +24,15 @@ var GetConfigDataCmd = &cobra.Command{
 		acKey := cmd.Parent().PersistentFlags().Lookup("accessKey").Value.String()
 		secKey := cmd.Parent().PersistentFlags().Lookup("secretKey").Value.String()
 		crossAccountRoleArn := cmd.Parent().PersistentFlags().Lookup("crossAccountRoleArn").Value.String()
-		env := cmd.Parent().PersistentFlags().Lookup("env").Value.String()
 		externalId := cmd.Parent().PersistentFlags().Lookup("externalId").Value.String()
 
-		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey, crossAccountRoleArn, env, externalId)
+		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey, crossAccountRoleArn, externalId)
 		print(authFlag)
 		// authFlag := true
 		if authFlag {
 			webAclId, _ := cmd.Flags().GetString("webAclId")
 			if webAclId != "" {
-				getClusterDetails(region, crossAccountRoleArn, acKey, secKey, env, externalId, webAclId)
+				getClusterDetails(region, crossAccountRoleArn, acKey, secKey, externalId, webAclId)
 			} else {
 				log.Fatalln("waf Acl Id not provided. Program exit")
 			}
@@ -41,7 +40,7 @@ var GetConfigDataCmd = &cobra.Command{
 	},
 }
 
-func getClusterDetails(region string, crossAccountRoleArn string, accessKey string, secretKey string, env string, externalId string, webAclId string) *waf.GetWebACLOutput {
+func getClusterDetails(region string, crossAccountRoleArn string, accessKey string, secretKey string,  externalId string, webAclId string) *waf.GetWebACLOutput {
 	log.Println("Getting aws waf details data")
 	listClusterClient := client.GetClient(region, crossAccountRoleArn, accessKey, secretKey, externalId)
 	input := &waf.GetWebACLInput{

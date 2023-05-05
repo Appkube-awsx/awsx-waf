@@ -58,9 +58,7 @@ func Execute() {
 
 func init() {
 	AwsxWafListCmd.AddCommand(wafcmd.GetConfigDataCmd)
-	AwsxWafListCmd.AddCommand(wafcmd.GetCostDataCmd)
-	AwsxWafListCmd.AddCommand(wafcmd.GetCostSpikeCmd)
-
+	
 	AwsxWafListCmd.PersistentFlags().String("vaultUrl", "", "vault end point")
 	AwsxWafListCmd.PersistentFlags().String("accountId", "", "aws account number")
 	AwsxWafListCmd.PersistentFlags().String("zone", "", "aws region")

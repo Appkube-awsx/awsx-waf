@@ -27,7 +27,7 @@ var GetConfigDataCmd = &cobra.Command{
 		externalId := cmd.Parent().PersistentFlags().Lookup("externalId").Value.String()
 
 		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey, crossAccountRoleArn, externalId)
-		print(authFlag)
+		// print(authFlag)
 		// authFlag := true
 		if authFlag {
 			webAclId, _ := cmd.Flags().GetString("webAclId")

@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/Appkube-awsx/awsx-waf/authenticator"
-	"github.com/Appkube-awsx/awsx-waf/client"
+	"github.com/Appkube-awsx/awsx-common/authenticate"
+	"github.com/Appkube-awsx/awsx-common/client"
 	"github.com/Appkube-awsx/awsx-waf/cmd/wafcmd"
 	"github.com/aws/aws-sdk-go/service/waf"
 	"github.com/spf13/cobra"
@@ -19,37 +19,44 @@ var AwsxWafListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		log.Println("Command get waf list started")
-		vaultUrl := cmd.PersistentFlags().Lookup("vaultUrl").Value.String()
-		accountNo := cmd.PersistentFlags().Lookup("accountId").Value.String()
-		region := cmd.PersistentFlags().Lookup("zone").Value.String()
-		acKey := cmd.PersistentFlags().Lookup("accessKey").Value.String()
-		secKey := cmd.PersistentFlags().Lookup("secretKey").Value.String()
-		crossAccountRoleArn := cmd.PersistentFlags().Lookup("crossAccountRoleArn").Value.String()
-		externalId := cmd.PersistentFlags().Lookup("externalId").Value.String()
+		
 
-		authFlag := authenticator.AuthenticateData(vaultUrl, accountNo, region, acKey, secKey, crossAccountRoleArn, externalId)
+		authFlag, clientAuth, err := authenticate.CommandAuth(cmd)
 
-		if authFlag {
-			getWebAclList(region, crossAccountRoleArn, acKey, secKey, externalId)
+		if err != nil {
+			cmd.Help()
+			return
 		}
-
+		if authFlag {
+			GetWebAclList(*clientAuth)
+		} else {
+			cmd.Help()
+			return
+		}
 	},
 }
 
-func getWebAclList(region string, crossAccountRoleArn string, accessKey string, secretKey string, externalId string) (*waf.ListWebACLsOutput, error) {
+func GetWebAclList(auth client.Auth) (*waf.ListWebACLsOutput, error) {
+
 	log.Println(" aws waf list details count summary")
-	dbclient := client.GetClient(region, crossAccountRoleArn, accessKey, secretKey, externalId)
-	dbRequest := waf.ListWebACLsInput{}
-	dbclusterResponse, err := dbclient.ListWebACLs(&dbRequest)
+
+	wafclient := client.GetClient(auth, client.WAF_CLIENT).(*waf.WAF)
+
+	wafRequest := &waf.ListWebACLsInput{}
+
+	wafclusterResponse, err := wafclient.ListWebACLs(wafRequest)
+
 	if err != nil {
 		log.Fatalln("Error:", err)
 	}
-	log.Println(dbclusterResponse)
-	return dbclusterResponse, err
+
+	log.Println(wafclusterResponse)
+	return wafclusterResponse, err
 }
 
 func Execute() {
 	err := AwsxWafListCmd.Execute()
+	
 	if err != nil {
 		log.Fatal("There was some error while executing the CLI: ", err)
 		os.Exit(1)
@@ -60,6 +67,7 @@ func init() {
 	AwsxWafListCmd.AddCommand(wafcmd.GetConfigDataCmd)
 	
 	AwsxWafListCmd.PersistentFlags().String("vaultUrl", "", "vault end point")
+	AwsxWafListCmd.PersistentFlags().String("vaultToken", "", "vault token")
 	AwsxWafListCmd.PersistentFlags().String("accountId", "", "aws account number")
 	AwsxWafListCmd.PersistentFlags().String("zone", "", "aws region")
 	AwsxWafListCmd.PersistentFlags().String("accessKey", "", "aws access key")

@@ -1,4 +1,4 @@
-package cmd
+package command
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/Appkube-awsx/awsx-common/authenticate"
 	"github.com/Appkube-awsx/awsx-common/client"
-	"github.com/Appkube-awsx/awsx-waf/cmd/wafcmd"
+	"github.com/Appkube-awsx/awsx-waf/command/wafcmd"
 	"github.com/aws/aws-sdk-go/service/waf"
 	"github.com/spf13/cobra"
 )
@@ -18,8 +18,7 @@ var AwsxWafListCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		log.Println("Command get waf list started")
-		
+		log.Println("Command getWafListDetails started")
 
 		authFlag, clientAuth, err := authenticate.CommandAuth(cmd)
 
@@ -37,26 +36,19 @@ var AwsxWafListCmd = &cobra.Command{
 }
 
 func GetWebAclList(auth client.Auth) (*waf.ListWebACLsOutput, error) {
-
-	log.Println(" aws waf list details count summary")
-
+	log.Println("aws waf list details")
 	wafclient := client.GetClient(auth, client.WAF_CLIENT).(*waf.WAF)
-
 	wafRequest := &waf.ListWebACLsInput{}
-
 	wafclusterResponse, err := wafclient.ListWebACLs(wafRequest)
-
 	if err != nil {
 		log.Fatalln("Error:", err)
 	}
-
 	log.Println(wafclusterResponse)
 	return wafclusterResponse, err
 }
 
 func Execute() {
 	err := AwsxWafListCmd.Execute()
-	
 	if err != nil {
 		log.Fatal("There was some error while executing the CLI: ", err)
 		os.Exit(1)
@@ -65,7 +57,7 @@ func Execute() {
 
 func init() {
 	AwsxWafListCmd.AddCommand(wafcmd.GetConfigDataCmd)
-	
+
 	AwsxWafListCmd.PersistentFlags().String("vaultUrl", "", "vault end point")
 	AwsxWafListCmd.PersistentFlags().String("vaultToken", "", "vault token")
 	AwsxWafListCmd.PersistentFlags().String("accountId", "", "aws account number")

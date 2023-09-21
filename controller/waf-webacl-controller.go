@@ -5,7 +5,7 @@ import (
 
 	"github.com/Appkube-awsx/awsx-common/authenticate"
 	"github.com/Appkube-awsx/awsx-common/client"
-	"github.com/Appkube-awsx/awsx-waf/cmd"
+	"github.com/Appkube-awsx/awsx-waf/command"
 	"github.com/aws/aws-sdk-go/service/waf"
 )
 
@@ -28,7 +28,7 @@ func GetWafByFlagAndClientAuth(authFlag bool, clientAuth *client.Auth, err error
 		log.Println(err.Error())
 		return nil, err
 	}
-	response, err := cmd.GetWebAclList(*clientAuth)
+	response, err := command.GetWebAclList(*clientAuth)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err
@@ -37,7 +37,7 @@ func GetWafByFlagAndClientAuth(authFlag bool, clientAuth *client.Auth, err error
 }
 
 func GetWafWebAcl(clientAuth *client.Auth) (*waf.ListWebACLsOutput, error) {
-	response, err := cmd.GetWebAclList(*clientAuth)
+	response, err := command.GetWebAclList(*clientAuth)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err

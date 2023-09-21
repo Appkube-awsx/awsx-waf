@@ -1,11 +1,7 @@
 package main
 
-import "github.com/Appkube-awsx/awsx-waf/cmd"
+import "github.com/Appkube-awsx/awsx-waf/command"
 
 func main() {
-	cmd.Execute()
+	command.Execute()
 }
-
-
-
-

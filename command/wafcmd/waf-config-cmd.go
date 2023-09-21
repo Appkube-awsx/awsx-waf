@@ -14,11 +14,11 @@ import (
 // getConfigDataCmd represents the getConfigData command
 var GetConfigDataCmd = &cobra.Command{
 	Use:   "getConfigData",
-	Short: "A brief description of your command",
-	Long:  ``,
+	Short: "Config data of waf",
+	Long:  `Config data of waf`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-	    authFlag, clientAuth, err := authenticate.SubCommandAuth(cmd)
+		authFlag, clientAuth, err := authenticate.SubCommandAuth(cmd)
 		if err != nil {
 			cmd.Help()
 			return
@@ -30,7 +30,7 @@ var GetConfigDataCmd = &cobra.Command{
 			if webAclId != "" {
 				GetClusterDetails(webAclId, *clientAuth)
 			} else {
-				log.Fatalln("waf webAclId not provided. program exit")
+				log.Fatalln("waf web acl id not provided. program exit")
 			}
 		}
 	},
@@ -48,7 +48,6 @@ func GetClusterDetails(webAclId string, auth client.Auth) *waf.GetWebACLOutput {
 
 	clusterDetailsResponse, err := listClusterClient.GetWebACL(input)
 
-	
 	if err != nil {
 		log.Fatalln("Error:", err)
 	}
@@ -59,7 +58,7 @@ func GetClusterDetails(webAclId string, auth client.Auth) *waf.GetWebACLOutput {
 }
 
 func init() {
-	GetConfigDataCmd.Flags().StringP("webAclId", "t", "", "web acl id")
+	GetConfigDataCmd.Flags().StringP("webAclId", "w", "", "web acl id")
 
 	if err := GetConfigDataCmd.MarkFlagRequired("webAclId"); err != nil {
 		fmt.Println(err)
